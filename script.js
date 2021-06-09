@@ -63,10 +63,14 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 //Displaying the transfers on the dashboard.
 
-function displayTransfers(transfers) {
+function displayTransfers(transfers, sort = false) {
   containerTransfers.innerHTML = '';
 
-  transfers.forEach(function (transfer, index) {
+  const sortedTransfers = sort
+    ? transfers.slice().sort((a, b) => a - b)
+    : transfers;
+
+  sortedTransfers.forEach(function (transfer, index) {
     const transferType = transfer > 0 ? 'deposit' : 'withdrawal';
     const transferTemplate = `
         <div class="transfers__row">
@@ -213,7 +217,30 @@ btnTransfer.addEventListener('click', function (e) {
   refreshDashboard();
 });
 
-//Event Hamdler - Close Account
+//Event Handler - Loans
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+  console.log('loan button');
+
+  const loanAmount = Number(inputLoanAmount.value);
+
+  if (
+    loanAmount > 0 &&
+    currentAccount.transfers.some(transfer => transfer >= 0.1 * loanAmount)
+  ) {
+    //Add loan to account
+    currentAccount.transfers.push(loanAmount);
+  } else alert('Invalid Loan Request');
+
+  //Clear Input Data
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+
+  //Update UI
+  refreshDashboard();
+});
+
+//Event Handler - Close Account
 btnClose.addEventListener('click', function (e) {
   e.preventDefault();
 
@@ -230,4 +257,13 @@ btnClose.addEventListener('click', function (e) {
   } else {
     alert('Incorrect Username or Pin');
   }
+});
+
+//Event Handler -  Sort
+let sorted = false;
+
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+  displayTransfers(currentAccount.transfers, !sorted);
+  sorted = !sorted;
 });
